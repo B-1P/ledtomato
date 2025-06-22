@@ -2,8 +2,23 @@
 
 import asyncio
 import time
+import os
+import sys
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
+
+# Platform-specific imports
+is_windows = sys.platform == 'win32'
+if is_windows:
+    import msvcrt  # Windows-specific for keyboard input
+else:
+    try:
+        import termios
+        import tty
+        import select
+    except ImportError:
+        pass  # Might be running on a non-Unix-like platform without these modules
+
 from .client import LEDTomatoClient
 from .display import Display
 from .config import Config
@@ -23,12 +38,56 @@ class TimerManager:
         self.config = config
         self.running = False
         self.last_state = None
-        
+    
+    def _kbhit(self) -> bool:
+        """Platform-agnostic way to check for a keypress"""
+        if is_windows:
+            return msvcrt.kbhit()
+        else:
+            # Unix-like systems (Linux, macOS)
+            try:
+                # Check if there's data available to read on stdin
+                # with a short timeout so it's non-blocking
+                dr, dw, de = select.select([sys.stdin], [], [], 0)
+                return len(dr) > 0
+            except (AttributeError, ValueError, NameError):
+                # select or stdin might not be available in this environment
+                return False
+            except Exception:
+                return False  # Any other exception, assume no key pressed
+    
+    def _getch(self) -> str:
+        """Platform-agnostic way to get a keypress without blocking"""
+        if is_windows:
+            return msvcrt.getch().decode('utf-8', errors='ignore').lower()
+        else:
+            # Unix-like systems (Linux, macOS)
+            try:
+                if self._kbhit():
+                    # Save terminal settings
+                    fd = sys.stdin.fileno()
+                    old_settings = termios.tcgetattr(fd)
+                    try:
+                        # Set terminal to raw mode
+                        tty.setraw(fd)
+                        ch = sys.stdin.read(1)
+                    finally:
+                        # Restore terminal settings
+                        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+                    return ch.lower()
+                return ''
+            except (AttributeError, NameError, termios.error):
+                # Modules or functions might not be available
+                return ''
+            except Exception:
+                return ''  # Any other exception, return empty string
+    
     async def interactive_loop(self) -> None:
         """Main interactive loop"""
         self.display.show_info("Interactive mode - Use commands or Ctrl+C to exit")
         self.display.console.print("\n[bold]Available commands:[/bold]")
         self.display.console.print("  [cyan]start[/cyan] - Start a timer session")
+        self.display.console.print("  [cyan]cycle[/cyan] - Start continuous Pomodoro cycle")
         self.display.console.print("  [cyan]stop[/cyan] - Stop current session")
         self.display.console.print("  [cyan]status[/cyan] - Show current status")
         self.display.console.print("  [cyan]config[/cyan] - Show configuration")
@@ -44,6 +103,8 @@ class TimerManager:
                     break
                 elif command == 'start':
                     await self._interactive_start()
+                elif command == 'cycle':
+                    await self.start_pomodoro_cycle()
                 elif command == 'stop':
                     await self._interactive_stop()
                 elif command == 'status':
@@ -110,13 +171,39 @@ class TimerManager:
             self.display.show_error("Failed to start timer")
     
     async def _interactive_stop(self) -> None:
-        """Interactive timer stop"""
+        """Interactive timer stop with breathing yellow animation"""
         success = await self.client.stop_timer()
         if success:
-            self.display.show_success("Timer stopped")
+            # Set breathing yellow animation for stopped state
+            await self._set_breathing_yellow()
+            self.display.show_success("Timer stopped (breathing yellow)")
         else:
             self.display.show_error("Failed to stop timer")
     
+    async def _set_breathing_yellow(self) -> None:
+        """Set LED to breathing yellow animation via REST API (stop state)"""
+        config = await self.client.get_config()
+        if not config:
+            return
+        config['workColor'] = 'FFFF00'  # Yellow
+        config['workAnimation'] = True
+        config['breakColor'] = 'FFFF00'
+        config['breakAnimation'] = True
+        await self.client.update_config(config)
+
+    async def _restore_session_colors(self, session_type: str) -> None:
+        """Restore LED color for work (red) or break (green) with animation as configured"""
+        config = await self.client.get_config()
+        if not config:
+            return
+        if session_type == 'work':
+            config['workColor'] = 'FF0000'  # Red
+            config['workAnimation'] = True
+        else:
+            config['breakColor'] = '00FF00'  # Green
+            config['breakAnimation'] = True
+        await self.client.update_config(config)
+
     async def _show_status(self) -> None:
         """Show current status"""
         status = await self.client.get_status()
@@ -144,13 +231,20 @@ class TimerManager:
         self.display.console.print("  [cyan]help[/cyan]    - Show this help message")
         self.display.console.print("  [cyan]quit[/cyan]    - Exit the application")
         self.display.console.print()
-    
     async def monitor_session(self) -> None:
         """Monitor current timer session"""
-        self.display.console.print("[blue]📊 Monitoring session... (Press Ctrl+C to stop monitoring)[/blue]")
+        self.display.console.print("[blue]📊 Monitoring session... (Press 'q' to return to menu)[/blue]")
         
         try:
             while True:
+                # Check for 'q' keypress to exit monitoring (non-blocking)
+                if self._kbhit():
+                    key = self._getch()
+                    if key == 'q':
+                        self.display.console.print("\n[yellow]Stopped monitoring[/yellow]")
+                        return
+                
+                # Get the current status
                 status = await self.client.get_status()
                 if not status:
                     self.display.show_error("Lost connection to device")
@@ -181,10 +275,13 @@ class TimerManager:
                     self._play_sound('end', session_type)
                     break
                 
+                # Short sleep to avoid high CPU usage
                 await asyncio.sleep(self.config.display.refresh_interval)
                 
-        except KeyboardInterrupt:
-            self.display.console.print("\n[yellow]Stopped monitoring[/yellow]")
+        except Exception as e:
+            self.display.show_error(f"Monitoring error: {e}")
+            # Return to menu instead of exiting completely
+            return
     
     async def _set_custom_duration(self, timer_type: str, duration: int) -> None:
         """Set custom duration for timer type"""
@@ -250,8 +347,7 @@ class TimerManager:
             
             # Append to log file
             with open(log_file, 'a') as f:
-                f.write(f"{log_entry}\n")
-                
+                f.write(f"{log_entry}\n")                
         except Exception as e:
             self.display.print_verbose(f"Could not log session: {e}")
     
@@ -301,3 +397,158 @@ class TimerManager:
             self.display.print_verbose(f"Could not read session log: {e}")
         
         return stats
+    
+    async def start_pomodoro_cycle(self) -> None:
+        """Start a continuous Pomodoro cycle with automatic transitions"""
+        self.display.show_info("🔄 Setting up continuous Pomodoro cycle")
+        
+        # Ask user if they want to use custom durations
+        use_custom = self.display.prompt_confirm("Use custom durations for cycle?", False)
+        
+        custom_durations = {}
+        if use_custom:
+            try:
+                # Format prompt with table
+                self.display.console.print("[cyan]Please enter custom durations in minutes:[/cyan]")
+                
+                # Using input with validation
+                work_duration = 0
+                short_break_duration = 0
+                long_break_duration = 0
+                
+                while work_duration <= 0:
+                    try:
+                        work_duration = int(input("Work session duration in minutes: "))
+                        if work_duration <= 0:
+                            self.display.show_error("Duration must be greater than 0")
+                    except ValueError:
+                        self.display.show_error("Please enter a valid number")
+                
+                while short_break_duration <= 0:
+                    try:
+                        short_break_duration = int(input("Short break duration in minutes: "))
+                        if short_break_duration <= 0:
+                            self.display.show_error("Duration must be greater than 0")
+                    except ValueError:
+                        self.display.show_error("Please enter a valid number")
+                
+                while long_break_duration <= 0:
+                    try:
+                        long_break_duration = int(input("Long break duration in minutes: "))
+                        if long_break_duration <= 0:
+                            self.display.show_error("Duration must be greater than 0")
+                    except ValueError:
+                        self.display.show_error("Please enter a valid number")
+                
+                custom_durations = {
+                    'work': work_duration,
+                    'short': short_break_duration,
+                    'long': long_break_duration
+                }
+                
+                # Update device configuration with custom durations
+                config = await self.client.get_config()
+                if config:
+                    config['workTime'] = custom_durations['work'] * 60
+                    config['shortBreakTime'] = custom_durations['short'] * 60
+                    config['longBreakTime'] = custom_durations['long'] * 60
+                    await self.client.update_config(config)
+                    
+                    # Create a visual confirmation
+                    self.display.console.print("\n[bold green]✅ Custom Pomodoro durations set:[/bold green]")
+                    self.display.console.print(f"  🔴 Work: [bold]{work_duration}[/bold] minutes")
+                    self.display.console.print(f"  🟢 Short Break: [bold]{short_break_duration}[/bold] minutes")
+                    self.display.console.print(f"  🟢 Long Break: [bold]{long_break_duration}[/bold] minutes")
+                    self.display.console.print()
+                else:
+                    self.display.show_error("Failed to get configuration")
+                    return
+            except KeyboardInterrupt:
+                self.display.show_warning("Custom duration setup cancelled")
+                return
+            except Exception as e:
+                self.display.show_error(f"Error setting up custom durations: {e}")
+                use_custom = False
+        
+        self.display.show_info("🔄 Starting continuous Pomodoro cycle (Press 'q' to stop)")
+        self.display.console.print("[dim]The cycle will automatically transition between work and break sessions[/dim]")
+        self.display.console.print("[dim]A long break will be taken after every 3 work sessions[/dim]")
+        self.display.console.print("[dim]Press 'q' during any session to stop the cycle and return to menu[/dim]\n")
+        
+        work_sessions = 0
+        try:
+            while True:
+                # Start work session
+                await self._start_and_monitor('work', custom_durations if use_custom else None)
+                work_sessions += 1
+                
+                # After work session, show progress
+                self.display.console.print(f"[bold]Completed {work_sessions} work sessions[/bold]")
+                
+                # After 3 work sessions, take a long break
+                if work_sessions % 3 == 0:
+                    self.display.console.print("[cyan]Taking a long break...[/cyan]")
+                    await self._start_and_monitor('long', custom_durations if use_custom else None)
+                else:
+                    self.display.console.print("[cyan]Taking a short break...[/cyan]")
+                    await self._start_and_monitor('short', custom_durations if use_custom else None)
+        except KeyboardInterrupt as e:
+            # Check if this is our custom interruption from pressing 'q'
+            if str(e) == "User requested to stop cycle with 'q' key":
+                # Already handled in _start_and_monitor
+                pass
+            else:
+                # This is an actual Ctrl+C
+                self.display.console.print("\n[yellow]Stopped Pomodoro cycle with Ctrl+C[/yellow]")
+                await self.client.stop_timer()
+                # Set breathing yellow for stopped state
+                await self._set_breathing_yellow()
+
+    async def _start_and_monitor(self, session_type: str, custom_durations: dict = None) -> None:
+        """Start a session (work/short/long) and monitor until it ends"""
+        # Restore correct color before starting
+        if session_type == 'work':
+            await self._restore_session_colors('work')
+        else:
+            await self._restore_session_colors('break')
+        
+        # Apply custom duration for this session if provided
+        if custom_durations and session_type in custom_durations:
+            await self._set_custom_duration(session_type, custom_durations[session_type])
+            
+        type_map = {"work": "work", "short": "short_break", "long": "long_break"}
+        api_type = type_map[session_type]
+        success = await self.client.start_timer(api_type)
+        if not success:
+            self.display.show_error(f"Failed to start {session_type} session")
+            return
+        session_name = session_type.replace('_', ' ').title()
+        self.display.show_success(f"Started {session_name} session")
+        self._play_sound('start', session_type)
+        
+        # Monitor session
+        self.display.console.print("[dim]Press 'q' to stop this session and cycle[/dim]")
+        while True:
+            # Check for 'q' keypress to exit monitoring (non-blocking)
+            if self._kbhit():
+                key = self._getch()
+                if key == 'q':
+                    self.display.console.print("\n[yellow]Session stopped early[/yellow]")
+                    # Stop the timer
+                    await self.client.stop_timer()
+                    # Set breathing yellow for stopped state
+                    await self._set_breathing_yellow()
+                    # Re-raise KeyboardInterrupt to stop the cycle
+                    raise KeyboardInterrupt("User requested to stop cycle with 'q' key")
+            
+            status = await self.client.get_status()
+            if not status:
+                self.display.show_error("Lost connection to device")
+                return
+            pomodoro = status.get('pomodoro', {})
+            if not pomodoro.get('running'):
+                self.display.show_info(f"{session_name} complete!")
+                self._play_sound('end', session_type)
+                break
+            self.display.show_timer_progress(status)
+            await asyncio.sleep(self.config.display.refresh_interval)
