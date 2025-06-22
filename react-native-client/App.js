@@ -12,7 +12,6 @@ import {
   Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Sound from 'react-native-sound';
 import PomodoroTimer from './components/PomodoroTimer';
 import ConfigModal from './components/ConfigModal';
 import ColorPicker from './components/ColorPicker';
@@ -81,23 +80,25 @@ const App = () => {
   };
 
   const setupSounds = () => {
-    Sound.setCategory('Playback');
+    // Sound is currently disabled on Windows due to library compatibility issues
+    if (Platform.OS === 'windows') {
+      console.log('Sound is disabled on Windows platform');
+      setWorkSound(null);
+      setBreakSound(null);
+      return;
+    }
     
-    // You would need to add these sound files to your project
-    const workSnd = new Sound('work_start.mp3', Sound.MAIN_BUNDLE, (error) => {
-      if (error) {
-        console.log('Failed to load work sound', error);
-      }
-    });
-    
-    const breakSnd = new Sound('break_start.mp3', Sound.MAIN_BUNDLE, (error) => {
-      if (error) {
-        console.log('Failed to load break sound', error);
-      }
-    });
-    
-    setWorkSound(workSnd);
-    setBreakSound(breakSnd);
+    try {
+      // Sound setup for other platforms would go here
+      // For now, we'll disable sound entirely
+      console.log('Sound setup not implemented for this platform');
+      setWorkSound(null);
+      setBreakSound(null);
+    } catch (error) {
+      console.log('Sound setup failed:', error.message);
+      setWorkSound(null);
+      setBreakSound(null);
+    }
   };
 
   const loadSavedConfig = async () => {

@@ -199,13 +199,56 @@ react-native-client/ios/Podfile.lock
 # ===========================================
 # Windows (React Native Windows)
 # ===========================================
+
+# Build output directories
+react-native-client/windows/x64/
+react-native-client/windows/x86/
+react-native-client/windows/ARM/
+react-native-client/windows/ARM64/
+react-native-client/windows/Debug/
+react-native-client/windows/Release/
+react-native-client/windows/AppPackages/
 react-native-client/windows/packages/
-react-native-client/windows/*/bin/
-react-native-client/windows/*/obj/
-react-native-client/windows/*.sln.DotSettings.user
+
+# Project-specific build artifacts  
+react-native-client/windows/**/bin/
+react-native-client/windows/**/obj/
 react-native-client/windows/*/Generated Files/
 react-native-client/windows/BundleArtifacts/
 react-native-client/windows/Bundle/
+
+# Windows project user files
+react-native-client/windows/**/*.vcxproj.user
+react-native-client/windows/**/*.vcxproj.filters
+react-native-client/windows/*.sln.DotSettings.user
+
+# Build logs and temporary files
+react-native-client/windows/**/*.log
+react-native-client/windows/**/*.tlog
+react-native-client/windows/**/*.idb
+react-native-client/windows/**/*.exp
+react-native-client/windows/**/*.lib
+react-native-client/windows/**/*.manifest
+react-native-client/windows/**/*.res
+
+# JavaScript bundles and maps
+react-native-client/windows/**/Bundle/
+react-native-client/windows/**/bundle/
+react-native-client/windows/**/sourcemaps/
+*.windows.bundle
+*.windows.bundle.map
+
+# But keep essential project files
+!react-native-client/windows/*.sln
+!react-native-client/windows/*/*.vcxproj
+!react-native-client/windows/*/packages.config
+!react-native-client/windows/*/Package.appxmanifest
+!react-native-client/windows/*/*.cpp
+!react-native-client/windows/*/*.h
+!react-native-client/windows/*/*.cs
+!react-native-client/windows/*/*.xaml
+!react-native-client/windows/*/*.rc
+!react-native-client/windows/*/*.def
 
 # Visual Studio
 *.suo
@@ -243,6 +286,22 @@ _pkginfo.txt
 *.appx
 *.appxbundle
 *.appxupload
+
+# React Native Windows intermediate files
+*.vcxproj.user
+*.vcxproj.filters
+*.aps
+*.ncb
+*.pch
+*.tmp
+*.tmp_proj
+*.log
+*.tlog
+*.lastbuildstate
+*.unsuccessfulbuild
+*.cache
+*.CopyComplete
+*.FileListAbsolute.txt
 
 # ===========================================
 # macOS
@@ -338,6 +397,13 @@ Debug/
 *.tar.gz
 *.zip
 *.7z
+
+# LED Tomato specific distribution artifacts
+LEDTomatoClient-Portable/
+LEDTomatoClient-Portable.zip
+LEDTomatoClient.msix
+*.appxrecipe
+*.build.appxrecipe
 
 # ===========================================
 # Temporary & Cache Files

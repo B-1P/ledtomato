@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import Slider from 'react-native-slider';
+import Slider from '@react-native-community/slider';
 import ColorPicker from './ColorPicker';
 
 const ConfigModal = ({ visible, config, onSave, onClose }) => {

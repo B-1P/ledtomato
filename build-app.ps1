@@ -41,7 +41,7 @@ switch ($Target) {
         # Check if Windows is initialized
         if (!(Test-Path "windows")) {
             Write-Host "🔧 Initializing React Native Windows..." -ForegroundColor Yellow
-            npx react-native-windows-init --overwrite --logging
+            npx react-native-windows-init --overwrite --verbose
             
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "❌ Failed to initialize React Native Windows!" -ForegroundColor Red
@@ -53,7 +53,7 @@ switch ($Target) {
             }
         }
         
-        npx react-native run-windows --arch x64 --logging
+        npx react-native run-windows --arch x64 --verbose
     }
     "windows-release" {
         Write-Host "🪟 Building Windows Release..." -ForegroundColor Cyan
