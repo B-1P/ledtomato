@@ -1,0 +1,79 @@
+{
+  "folders": [
+    {
+      "name": "ESP32 Firmware",
+      "path": "./esp32-firmware"
+    },
+    {
+      "name": "React Native App",
+      "path": "./react-native-client"
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "*.ino": "cpp",
+      "*.h": "cpp"
+    },
+    "C_Cpp.default.includePath": [
+      "${workspaceFolder}/esp32-firmware/.pio/libdeps/*/*",
+      "${workspaceFolder}/esp32-firmware/.pio/libdeps/*/*/*"
+    ],
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "emmet.includeLanguages": {
+      "javascript": "javascriptreact"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "platformio.platformio-ide",
+      "ms-vscode.cpptools",
+      "msjsdiag.vscode-react-native",
+      "bradlc.vscode-tailwindcss",
+      "formulahendry.auto-rename-tag"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [      {
+        "label": "PlatformIO: Build ESP32",
+        "type": "shell",
+        "command": "pio",
+        "args": ["run"],
+        "options": {
+          "cwd": "${workspaceFolder}/esp32-firmware"
+        },
+        "group": "build"
+      },
+      {
+        "label": "PlatformIO: Upload ESP32",
+        "type": "shell",
+        "command": "pio",
+        "args": ["run", "--target", "upload"],
+        "options": {
+          "cwd": "${workspaceFolder}/esp32-firmware"
+        }
+      },
+      {
+        "label": "React Native: Start Metro",
+        "type": "shell",
+        "command": "npm",
+        "args": ["start"],
+        "options": {
+          "cwd": "${workspaceFolder}/react-native-client"
+        },
+        "group": "build",
+        "isBackground": true
+      },
+      {
+        "label": "React Native: Run Android",
+        "type": "shell",
+        "command": "npx",
+        "args": ["react-native", "run-android"],
+        "options": {
+          "cwd": "${workspaceFolder}/react-native-client"
+        },
+        "group": "build"
+      }
+    ]
+  }
+}

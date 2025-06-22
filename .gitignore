@@ -1,0 +1,402 @@
+# ===========================================
+# LED Tomato Project - Comprehensive .gitignore
+# ===========================================
+
+# ===========================================
+# ESP32 / PlatformIO
+# ===========================================
+.pio/
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch
+.vscode/extensions.json
+*.elf
+*.bin
+*.map
+*.hex
+
+# ESP32 specific
+esp32-firmware/.pio/
+esp32-firmware/build/
+esp32-firmware/sdkconfig
+esp32-firmware/sdkconfig.old
+esp32-firmware/.vscode/
+
+# ===========================================
+# Node.js / React Native
+# ===========================================
+
+# Dependencies
+node_modules/
+jspm_packages/
+react-native-client/node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Environment variables
+.env
+.env.test
+.env.local
+.env.development.local
+.env.production.local
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# TypeScript
+*.tsbuildinfo
+typings/
+
+# ===========================================
+# React Native Specific
+# ===========================================
+
+# Metro bundler
+.metro-health-check*
+metro.config.js.bak
+
+# Flipper
+react-native-client/android/app/src/debug/assets/flipper/
+
+# Bundle artifacts
+*.jsbundle
+
+# ===========================================
+# Android
+# ===========================================
+react-native-client/android/build/
+react-native-client/android/app/build/
+react-native-client/android/.gradle/
+react-native-client/android/local.properties
+react-native-client/android/gradle.properties
+react-native-client/android/keystore.properties
+react-native-client/android/app/src/main/assets/index.android.bundle
+react-native-client/android/app/src/main/assets/index.android.bundle.meta
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Android Studio
+.gradle/
+local.properties
+captures/
+.navigation/
+*.hprof
+
+# Keystore files
+*.keystore
+*.jks
+!debug.keystore
+
+# External native build folder generated in Android Studio 3.2+
+.externalNativeBuild/
+.cxx/
+
+# ===========================================
+# iOS
+# ===========================================
+react-native-client/ios/build/
+react-native-client/ios/Pods/
+react-native-client/ios/*.xcworkspace/xcuserdata/
+react-native-client/ios/*.xcodeproj/xcuserdata/
+react-native-client/ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Xcode
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace/
+
+# CocoaPods
+react-native-client/ios/Podfile.lock
+
+# ===========================================
+# Windows (React Native Windows)
+# ===========================================
+react-native-client/windows/packages/
+react-native-client/windows/*/bin/
+react-native-client/windows/*/obj/
+react-native-client/windows/*.sln.DotSettings.user
+react-native-client/windows/*/Generated Files/
+react-native-client/windows/BundleArtifacts/
+react-native-client/windows/Bundle/
+
+# Visual Studio
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Visual Studio Code
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/*.code-workspace
+
+# MSBuild Binary and Structured Log
+*.binlog
+
+# Windows Store app package directories and files
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.appx
+*.appxbundle
+*.appxupload
+
+# ===========================================
+# macOS
+# ===========================================
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Icon?
+
+# ===========================================
+# Windows OS
+# ===========================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# ===========================================
+# Linux
+# ===========================================
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===========================================
+# Development Tools
+# ===========================================
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+
+# ===========================================
+# Build Artifacts & Distribution  
+# ===========================================
+build/
+dist/
+out/
+release/
+Release/
+Debug/
+*.apk
+*.ipa
+*.exe
+*.msi
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+*.7z
+
+# ===========================================
+# Temporary & Cache Files
+# ===========================================
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*~
+.tmp/
+temp/
+cache/
+
+# ===========================================
+# Secrets & Configuration
+# ===========================================
+.env.secret
+.env.production
+config/secrets.*
+secrets.json
+private-key.json
+service-account.json
+firebase-adminsdk*.json
+
+# ===========================================
+# Backup Files
+# ===========================================
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+
+# ===========================================
+# Project Specific
+# ===========================================
+
+# LED Tomato specific files
+*.pomodoro
+led-tomato-config.json
+device-settings.json
+
+# Audio files (these should be added by users)
+react-native-client/android/app/src/main/res/raw/*.mp3
+react-native-client/android/app/src/main/res/raw/*.wav
+react-native-client/android/app/src/main/res/raw/*.m4a
+!react-native-client/android/app/src/main/res/raw/README.md
+
+# Documentation build
+docs/_site/
+docs/.jekyll-cache/
+docs/.jekyll-metadata
+
+# ===========================================
+# Keep these files
+# ===========================================
+!.gitkeep
+!.gitignore
+!README.md
+!LICENSE
+!*.example
