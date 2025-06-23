@@ -1,0 +1,3 @@
+[console_scripts]
+ledtomato = ledtomato_cli.main:cli
+tomato = ledtomato_cli.main:cli

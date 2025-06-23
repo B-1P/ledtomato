@@ -1,0 +1,341 @@
+Metadata-Version: 2.4
+Name: ledtomato-cli
+Version: 1.0.0
+Summary: Command-line interface for LED Tomato Pomodoro Timer
+Author: LED Tomato Team
+License: MIT
+Project-URL: Homepage, https://github.com/yourusername/ledtomato
+Project-URL: Repository, https://github.com/yourusername/ledtomato
+Project-URL: Documentation, https://github.com/yourusername/ledtomato/blob/main/README.md
+Project-URL: Bug Tracker, https://github.com/yourusername/ledtomato/issues
+Keywords: pomodoro,timer,productivity,iot,esp32,cli
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Office/Business :: Scheduling
+Classifier: Topic :: Utilities
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: click>=8.0.0
+Requires-Dist: requests>=2.28.0
+Requires-Dist: rich>=12.0.0
+Requires-Dist: zeroconf>=0.47.0
+Requires-Dist: colorama>=0.4.4
+Requires-Dist: pydantic>=1.10.0
+Requires-Dist: python-dateutil>=2.8.0
+Requires-Dist: playsound>=1.3.0
+Requires-Dist: appdirs>=1.4.4
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: isort>=5.10.0; extra == "dev"
+Requires-Dist: flake8>=5.0.0; extra == "dev"
+Requires-Dist: mypy>=0.991; extra == "dev"
+
+# LED Tomato Python CLI Client
+
+A comprehensive command-line interface for controlling your LED Tomato Pomodoro Timer device.
+
+## Features
+
+- 🔍 **Auto-discovery**: Automatically find LED Tomato devices on your network
+- ⏰ **Timer Control**: Start, stop, and monitor Pomodoro sessions
+- 🎨 **Rich Interface**: Beautiful terminal UI with progress bars and colors
+- 🔧 **Configuration**: Manage device settings from the command line
+- 📊 **Session Monitoring**: Real-time monitoring with live updates
+- 🎵 **Audio Cues**: Play sounds when sessions start/end (optional)
+- 💾 **Session Logging**: Track your productivity sessions
+- 🔄 **Interactive Mode**: Full-featured interactive shell
+
+## Installation
+
+### Option 1: Install from source (Recommended)
+
+```bash
+# Clone the repository (if not already done)
+git clone https://github.com/yourusername/ledtomato.git
+cd ledtomato/python-cli
+
+# Install in development mode
+pip install -e .
+```
+
+### Option 2: Install dependencies manually
+
+```bash
+cd python-cli
+pip install -r requirements.txt
+```
+
+### Option 3: Using pipx (Isolated installation)
+
+```bash
+pipx install ./python-cli
+```
+
+## Usage
+
+### Command Line Interface
+
+After installation, you can use the CLI with the `ledtomato` or `tomato` command:
+
+```bash
+# Auto-discover and connect to device
+ledtomato
+
+# Start a work session
+ledtomato start --type work
+
+# Start with custom duration
+ledtomato start --type work --duration 30
+
+# Stop current session
+ledtomato stop
+
+# Show device status
+ledtomato status
+
+# Discover devices on network
+ledtomato discover
+
+# Configure device settings
+ledtomato config --work-time 25 --brightness 200
+
+# Specify device manually
+ledtomato --device 192.168.1.100 status
+```
+
+### Interactive Mode
+
+Launch interactive mode for full control:
+
+```bash
+ledtomato
+```
+
+Available commands in interactive mode:
+- `start` - Start a timer session
+- `stop` - Stop current session
+- `status` - Show device status
+- `config` - Show device configuration
+- `monitor` - Monitor session with live updates
+- `help` - Show help information
+- `quit` - Exit application
+
+### Configuration
+
+The CLI creates configuration files in your user directory:
+- **Config**: `~/.config/ledtomato-cli/config.json`
+- **Cache**: `~/.cache/ledtomato-cli/devices.json`
+- **Logs**: `~/.local/share/ledtomato-cli/sessions.log`
+
+#### Config File Example
+
+```json
+{
+  "pomodoro": {
+    "work_time": 25,
+    "short_break": 5,
+    "long_break": 15,
+    "work_color": "#FF0000",
+    "break_color": "#00FF00",
+    "brightness": 128,
+    "work_animation": false,
+    "break_animation": true
+  },
+  "sound": {
+    "enabled": true,
+    "volume": 0.8,
+    "work_start_sound": null,
+    "break_start_sound": null,
+    "session_end_sound": null
+  },
+  "display": {
+    "show_progress": true,
+    "show_ascii_tomato": true,
+    "color_output": true,
+    "compact_mode": false,
+    "refresh_interval": 1.0
+  },
+  "network": {
+    "discovery_timeout": 10,
+    "request_timeout": 5,
+    "default_device": null,
+    "preferred_devices": []
+  }
+}
+```
+
+## Command Reference
+
+### Global Options
+- `--device, -d` - Specify device IP address
+- `--discover` - Auto-discover devices
+- `--config, -c` - Path to config file
+- `--verbose, -v` - Verbose output
+
+### Commands
+
+#### `start` - Start Timer Session
+```bash
+ledtomato start [OPTIONS]
+```
+Options:
+- `--type, -t` - Timer type: work, short, long (default: work)
+- `--duration` - Custom duration in minutes
+
+#### `stop` - Stop Current Session
+```bash
+ledtomato stop [OPTIONS]
+```
+
+#### `status` - Show Device Status
+```bash
+ledtomato status [OPTIONS]
+```
+
+#### `discover` - Find Devices
+```bash
+ledtomato discover
+```
+
+#### `config` - Configure Device
+```bash
+ledtomato config [OPTIONS]
+```
+Options:
+- `--work-time` - Work session duration (minutes)
+- `--short-break` - Short break duration (minutes)
+- `--long-break` - Long break duration (minutes)
+- `--work-color` - Work session color (hex)
+- `--break-color` - Break session color (hex)
+- `--brightness` - LED brightness (0-255)
+
+## Examples
+
+### Basic Usage
+```bash
+# Start a 25-minute work session
+ledtomato start
+
+# Start a 30-minute work session
+ledtomato start --duration 30
+
+# Start a short break
+ledtomato start --type short
+
+# Monitor current session
+ledtomato status
+```
+
+### Device Discovery
+```bash
+# Find all LED Tomato devices
+ledtomato discover
+
+# Connect to specific device
+ledtomato --device 192.168.1.100 status
+```
+
+### Configuration
+```bash
+# Set work time to 30 minutes
+ledtomato config --work-time 30
+
+# Change colors and brightness
+ledtomato config --work-color FF0000 --break-color 00FF00 --brightness 200
+
+# Configure multiple settings
+ledtomato config --work-time 25 --short-break 5 --long-break 15 --brightness 150
+```
+
+### Interactive Session
+```bash
+# Start interactive mode
+ledtomato
+
+# In interactive mode:
+🍅 > start
+Select timer type [work/short/long] (default: work): work
+Use custom duration? [y/N]: n
+✅ Started Work session
+Monitor this session? [Y/n]: y
+📊 Monitoring session... (Press Ctrl+C to stop monitoring)
+```
+
+## Troubleshooting
+
+### Device Not Found
+```bash
+# Check network connectivity
+ping 192.168.4.1  # Default AP mode IP
+
+# Manually specify device
+ledtomato --device 192.168.4.1 status
+
+# Scan for devices
+ledtomato discover
+```
+
+### Connection Issues
+```bash
+# Test with verbose output
+ledtomato --verbose status
+
+# Check device is running
+curl http://192.168.4.1/api/status
+```
+
+### Sound Issues
+- Install audio dependencies: `pip install playsound`
+- Check audio files exist in config
+- Verify system audio is working
+
+## Dependencies
+
+Core dependencies:
+- `click` - Command-line interface framework
+- `requests` - HTTP requests
+- `rich` - Terminal formatting and progress bars
+- `zeroconf` - mDNS device discovery
+- `colorama` - Cross-platform colored terminal text
+- `pydantic` - Data validation
+- `python-dateutil` - Date/time utilities
+- `appdirs` - Platform-specific directories
+
+Optional dependencies:
+- `playsound` - Audio notification support
+
+## Development
+
+### Running from Source
+```bash
+cd python-cli
+python -m ledtomato_cli.main --help
+```
+
+### Installing in Development Mode
+```bash
+pip install -e .
+```
+
+### Code Style
+The project uses:
+- `black` for code formatting
+- `isort` for import sorting
+- `flake8` for linting
+- `mypy` for type checking
+
+## License
+
+MIT License - see LICENSE file for details.

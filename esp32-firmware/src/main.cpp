@@ -422,8 +422,8 @@ void updateLEDs() {
       solidColor(color);
     }
   } else {
-    // Idle state - dim white
-    solidColor(strip.Color(20, 20, 20));
+    // Idle state - breathing orange
+    breathingAnimation(strip.Color(255, 128, 0)); // Orange
   }
 }
 
